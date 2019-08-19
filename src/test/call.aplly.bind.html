@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>React App</title>
+</head>
+
+<body>
+  <script>
+    //自定义call
+      Function.prototype.call = function (obj) {
+        //截取一下，保存call的参数，也可以使用filter来遍历
+        const argus = [...arguments].splice(1)
+        //将当前函数保存到obj对象（临时保存）
+        obj.tempFn = this
+        //方法执行，内部的this是obj
+        obj.tempFn(...argus)
+        //删除属性
+        delete obj.tempFn
+      }
+
+      //自定义apply
+      Function.prototype.apply = function (obj,argus) {
+      //截取一下，保存aplly的参数，也可以使用filter来遍历
+      const argus = [...arguments].splice(1)
+      //将当前函数保存到obj对象（临时保存）
+      obj.tempFn = this
+      //方法执行，内部的this是obj
+      obj.tempFn(...argus)
+      //删除属性
+      delete obj.tempFn
+      }
+
+      //自定义bind
+      Function.prototype.bind = function (obj) {
+        obj = obj || window
+        const argus = []
+        //arguments:调用bind函数时传递的实参伪数组，需要从第二个开始，都保存到argus中
+        if(arguments.length > 1){
+          for (let i = 1; i < arguments.length; i++) {
+            argus.push(arguments[i])
+            
+          }
+        }
+      }
+
+      const obj = {m:1}
+      fn.call(obj,2,3,4)
+      fn.aplly(obj,[2,3,4])
+  </script>
+</body>
+
+</html>
