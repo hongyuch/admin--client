@@ -1,11 +1,10 @@
 //admin的左侧导航
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
 import { Link, withRouter } from 'react-router-dom'
 import { Menu, Icon } from 'antd'
 
-import { setHeaderTitle } from '../../redux/actions'
 import menuList from '../../config/menuConfig'
+import memoryUtils from '../../untils/memoryUtils'
 import login from '../../assets/images/logo.png'
 import './index.less'
 
@@ -14,7 +13,7 @@ const { SubMenu, Item } = Menu
 class LeftNav extends Component {
     hasAuth = (item)  => {
         //得到当前用户的所有权限
-        const user = this.props.user
+        const user = memoryUtils.user
         const menus = user.role.menus
         //如果当前用户是admin
         //如果item是公开的
@@ -22,7 +21,7 @@ class LeftNav extends Component {
         if (user.username === 'admin' || item.public || menus.indexOf(item.key) !== -1){
             return true
         }else if(item.children){
-            const cItem = item.children.find(cItem => menus.indexOf(cItem.key) !== -1)
+            const cItem = item.children.find(cItem => menus.indexOf(cItem.key) != -1)
             return !!cItem
         }
         //如果当前用户有item的某个节点的权限，当前item也应该显示
@@ -32,18 +31,14 @@ class LeftNav extends Component {
     getMenuNodes = (menuList) => {
         const path = this.props.location.pathname
         // console.log(menuList)
-        return (menuList.map((item) => {
+        return menuList.map((item) => {
             //判断当前用户是否具有操作item的权限，如果有才显示对应的
             if(this.hasAuth(item)){
                 //判断，返回的是<Item>，还是<SubMenu>
                 if (!item.children) {
-                    // 如果请求的路径与当前item的key一致, 将当前item的title更新到redux的状态
-                    if (path.indexOf(item.key) === 0){
-                        this.props.setHeaderTitle(item.title)
-                    }
                     return (
                         <Item key={item.key}>
-                            <Link to={item.key} onClick={() => this.props.setHeaderTitle(item.title)}>
+                            <Link to={item.key}>
                                 <Icon type={item.icon} />
                                 <span>{item.title}</span>
                             </Link>
@@ -74,7 +69,7 @@ class LeftNav extends Component {
                     )
                 }
             }
-        }))
+        })
     }
 
     componentWillMount() {
@@ -106,9 +101,4 @@ class LeftNav extends Component {
 }
 
 // 新组件会向LeftNav组件传递3个属性: history/location/match
-export default connect(
-    state => ({
-        user:state.user
-    }),
-    { setHeaderTitle }
-)(withRouter(LeftNav))
+export default withRouter(LeftNav)

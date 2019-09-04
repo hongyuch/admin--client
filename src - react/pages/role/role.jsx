@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
 import {Card,Button,Table,Modal,message} from 'antd'
 
 import LinkButton from '../../components/link-button'
 import { reqRoles, reqAddRole, reqUpdateRole } from '../../api'
+import memoryUtils from '../../untils/memoryUtils'
 import {formateDate} from '../../untils/dateUtils'
 import AddForm from './add-form.jsx'
 import AuthForm from './auth-form'
 
-class Role extends Component {
+export default class Role extends Component {
     constructor(props){
         super(props)
         this.authRef = React.createRef()
@@ -89,7 +89,7 @@ class Role extends Component {
         const role = this.role
         role.menus = this.authRef.current.getMenus()
         role.auth_time = Date.now()
-        role.auth_name = this.props.user.username
+        role.auth_name = memoryUtils.user.username
         const result = await reqUpdateRole(role)
         if (result.status === 0){
             message.success('设置角色权限成功')
@@ -147,9 +147,3 @@ class Role extends Component {
         )
     }
 }
-export default connect(
-    state => ({
-        user:state.user
-    }),
-    {}
-)(Role)

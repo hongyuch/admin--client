@@ -1,13 +1,14 @@
 //admin的左侧导航
 import React, { Component } from 'react'
-import {connect} from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import { Modal } from 'antd'
 
+import memoryUtils from '../../untils/memoryUtils'
 import LinkButton from '../link-button'
+import {removeUser} from '../../untils/storageUtils'
+import menuConfig from '../../config/menuConfig.js'
 import {reqWeather} from '../../api'
 import {formateDate} from '../../untils/dateUtils'
-import { logout } from '../../redux/actions'
 
 
 
@@ -20,11 +21,15 @@ class Header extends Component {
         weather: ''
       }
     //退出登录
-    logout = () => {
+    logOut = () => {
         Modal.confirm({
             title: '确认退出吗?',
             onOk: () => {
-                this.props.logout()
+                // 删除保存的user数据
+                removeUser()
+                memoryUtils.user = {}
+                // 跳转到login
+                this.props.history.replace('/login')
             },
             onCancel() {
                 console.log('Cancel')
@@ -32,22 +37,22 @@ class Header extends Component {
         })
     }
     //得到对应的标题
-    // getTitle = () => {
-    //     let title = ''
-    //     const path = this.props.location.pathname
-    //     menuConfig.forEach(item => {
-    //         //判断
-    //         if (item.key === path) {
-    //             title = item.title;
-    //         } else if (item.children) {
-    //             const cItem = item.children.find(cItem => path.indexOf(cItem.key) === 0)
-    //             if (cItem) {
-    //                 title = cItem.title
-    //             }
-    //         }
-    //     })
-    //     return title
-    // }
+    getTitle = () => {
+        let title = ''
+        const path = this.props.location.pathname
+        menuConfig.forEach(item => {
+            //判断
+            if (item.key === path) {
+                title = item.title
+            } else if (item.children) {
+                const cItem = item.children.find(cItem => path.indexOf(cItem.key) === 0)
+                if (cItem) {
+                    title = cItem.title
+                }
+            }
+        })
+        return title
+    }
 
     async componentDidMount (){
         //更新时间
@@ -66,13 +71,13 @@ class Header extends Component {
         clearInterval(this.timer)
     }
     render() {
-        const user = this.props.user
-        const title = this.props.headerTitle
+        const user = memoryUtils.user
+        const title = this.getTitle()
         return (
             <div className='header'>
                 <div className='header-top'>
                     <span>欢迎,{user.username}</span>
-                    <LinkButton onClick={this.logout}>退出</LinkButton>
+                    <LinkButton onClick={this.logOut}>退出</LinkButton>
                 </div>
                 <div className='header-bottom'>
                     <div className='header-bottom-left'>{title}</div>
@@ -86,10 +91,4 @@ class Header extends Component {
         )
     }
 }
-export default connect(
-    state => ({
-        headerTitle:state.headerTitle,
-        user:state.user
-    }),
-    { logout }
-)(withRouter(Header))
+export default withRouter(Header)
